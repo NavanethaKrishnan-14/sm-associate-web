@@ -70,3 +70,7 @@ header{border-bottom:0;padding-bottom:0;margin-bottom:22px}
 
 .brand-logo-image{display:block;width:320px;height:auto;max-height:92px;object-fit:contain;object-position:left center}.brand-logo-image.compact{width:285px;max-height:80px}.login-brand{display:flex;align-items:center}.login-panel .brand-logo-image{width:360px;max-width:100%;max-height:130px;margin:0 auto 4px}.login-panel .premium-logo-type{display:none}
 @media(max-width:650px){.brand-logo-image.compact{width:220px;max-height:64px}.login-panel .brand-logo-image{width:300px}}
+
+.action-buttons{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:max-content}
+.delete-btn{border-color:#e7b5b1;background:#fff7f6;color:#b42318}
+.delete-btn:hover{border-color:#c94a43;background:#fff1f0;color:#8f1d17}
