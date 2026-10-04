@@ -38,7 +38,8 @@ const ICON_PATHS:Record<IconName,string[]>={
  users:["M16 20v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7-1v6m3-3h-6"],
  plus:["M12 5v14M5 12h14"],
  arrow:["M5 12h14m-6-6 6 6-6 6"],
- bell:["M7 17h10l-1-2V10a4 4 0 0 0-8 0v5l-1 2Zm3 3h4"]
+  bell:["M7 17h10l-1-2V10a4 4 0 0 0-8 0v5l-1 2Zm3 3h4"],
+  documents:["M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h6"]
 };
 function AppIcon({name,className=""}:{name:IconName;className?:string}){const paths=ICON_PATHS[name]??ICON_PATHS.dashboard;return <svg className={"app-icon "+className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths.map((d,i)=><path key={i} d={d}/>)}</svg>}
 function iconForLabel(label:string):IconName{
