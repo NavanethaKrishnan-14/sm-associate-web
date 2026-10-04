@@ -4,7 +4,7 @@ import { api } from "./services/api";
 type User={id:string;name:string;email:string;role:"ADMIN"|"STAFF";isActive?:boolean};
 type Customer={_id:string;customerId:string;name:string;mobile:string;email?:string;city?:string;occupation?:string};
 type Loan={_id:string;loanId:string;customerId:Customer;loanType:string;requiredAmount:number;approvedAmount?:number;financeCompany?:string;status:string;commission:number;applicationDate?:string;expectedDisbursementDate?:string;disbursementDate?:string;rejectionReason?:string;notes?:string};
-type Car={_id:string;vehicleId:string;registrationNumber:string;make:string;model:string;year:number;ownerNumber:number;km:number;fuel:string;purchasePrice:number;status:string;sellerId?:Customer};
+type Car={_id:string;vehicleId:string;registrationNumber:string;make:string;model:string;year:number;ownerNumber:number;km:number;fuel:string;purchasePrice:number;expenseTotal?:number;totalInvestment?:number;status:string;sellerId?:Customer};
 type Dashboard={customers:number;activeLoans:number;carsInInventory:number;carsSold:number;totalSales:number;totalInvestment:number;totalProfit:number};
 
 const money=(v:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(v);
@@ -138,7 +138,7 @@ function CarsPage({mode}:{mode:string}){
  const[cars,setCars]=useState<Car[]>([]);const[message,setMessage]=useState("");
  const load=()=>api.get("/cars",{params:{status:mode==="Car Inventory"?"AVAILABLE":undefined}}).then(r=>setCars(r.data.data)).catch(()=>setMessage("Unable to load cars."));
  useEffect(()=>{load()},[mode]);
- return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicles, investment and operating details.</p></div></div>{message&&<div className="error-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase</th><th>Status</th></tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td><span className="status">{c.status}</span></td></tr>)}{!cars.length&&<tr><td colSpan={5} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
+ return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicle purchase price plus every expense is treated as the current investment for profit calculation.</p></div></div>{message&&<div className="error-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase Price</th><th>Expenses</th><th>Total Investment</th><th>Status</th></tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td>{money(c.expenseTotal||0)}</td><td><strong>{money(c.totalInvestment??c.purchasePrice)}</strong></td><td><span className="status">{c.status}</span></td></tr>)}{!cars.length&&<tr><td colSpan={7} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
 }
 
 type CarExpense={_id:string;carId:any;category:string;amount:number;description?:string;date:string;createdAt?:string};
