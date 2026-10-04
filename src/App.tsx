@@ -36,7 +36,7 @@ function PremiumSelect({value,onChange,placeholder,options}:{value:string;onChan
  </div>
 }
 
-function PremiumLogo({compact=false}:{compact?:boolean}){return <div className={compact?"premium-logo compact":"premium-logo"} aria-label="SM Associate"><span className="premium-logo-mark" aria-hidden="true"><span>S</span><span>M</span></span><span className="premium-logo-type"><strong>SM</strong><em>ASSOCIATE</em></span></div>}
+function PremiumLogo({compact=false}:{compact?:boolean}){return <img className={compact?"brand-logo-image compact":"brand-logo-image"} src="/assets/sm-associate-logo.svg" alt="SM Associate" />}
 
 function TopBar({user}:{user:User}){const[q,setQ]=useState("");function submit(e:FormEvent){e.preventDefault();const term=q.trim();if(term)window.dispatchEvent(new CustomEvent("sm-global-search",{detail:{query:term}}))}return <div className="topbar"><div className="topbar-search"><form onSubmit={submit}><span className="search-icon" aria-hidden="true"></span><input aria-label="Search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search customers, loans, vehicles..." /></form></div><div className="topbar-actions"><button type="button" className="topbar-icon" aria-label="Notifications"><span className="bell-icon"></span></button><div className="topbar-profile"><span className="profile-avatar">{user.name.trim().slice(0,1).toUpperCase()||"S"}</span><span className="profile-copy"><strong>{user.name}</strong><small>{user.role}</small></span><span className="profile-chevron"></span></div></div></div>}
 
