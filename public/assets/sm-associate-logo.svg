@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 620" role="img" aria-labelledby="title desc">
+<title id="title">SM Associate</title><desc id="desc">Premium SM Associate logo for finance, loans, insurance and cars.</desc>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".28" stop-color="#d8ad55"/><stop offset=".55" stop-color="#fff0b0"/><stop offset="1" stop-color="#9a6b1f"/></linearGradient>
+ <linearGradient id="silver" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#aeb6c0"/><stop offset=".7" stop-color="#f7f8fa"/><stop offset="1" stop-color="#707984"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000" flood-opacity=".22"/></filter>
+</defs>
+<g filter="url(#shadow)">
+ <path d="M85 300 C185 205 270 168 390 154 L520 40 L635 30 L690 150 C805 108 1015 105 1190 170 C1260 196 1312 237 1360 287 C1270 252 1198 240 1110 241 C1010 242 940 260 855 302 C730 364 630 405 475 408 C330 412 190 381 85 300Z" fill="none" stroke="url(#gold)" stroke-width="18" stroke-linejoin="round"/>
+ <path d="M110 285 C245 235 330 223 470 222 C650 219 825 229 1000 245 C1125 256 1215 275 1335 309" fill="none" stroke="url(#gold)" stroke-width="24" stroke-linecap="round"/>
+ <path d="M395 168 L520 40 L635 30 L650 163" fill="none" stroke="url(#gold)" stroke-width="18"/>
+ <path d="M475 178 L475 95 L505 95 L505 168 M535 155 L535 72 L565 72 L565 151" fill="none" stroke="url(#gold)" stroke-width="12"/>
+ <path d="M110 330 C145 435 285 492 430 474 C525 462 592 423 650 357 L585 338 C535 385 485 410 415 418 C300 432 205 397 160 328 C147 308 126 310 110 330Z" fill="url(#gold)"/>
+ <path d="M430 214 L555 347 L705 190 L750 210 L610 430 L405 254Z" fill="url(#silver)"/>
+ <path d="M745 195 L780 188 L780 442 L715 442 L715 220Z" fill="url(#gold)"/>
+ <path d="M780 205 C900 157 1080 160 1190 207 C1230 224 1262 246 1287 270 C1195 247 1110 239 1015 244 C925 249 850 268 780 296Z" fill="none" stroke="url(#gold)" stroke-width="13"/>
+ <path d="M1035 190 C1080 186 1127 192 1170 207" fill="none" stroke="url(#gold)" stroke-width="11"/>
+ <circle cx="1040" cy="282" r="18" fill="url(#gold)"/><circle cx="1210" cy="282" r="18" fill="url(#gold)"/>
+</g>
+<g transform="translate(820 375)">
+ <text x="0" y="0" font-family="Georgia, 'Times New Roman', serif" font-size="155" font-weight="700" letter-spacing="8" fill="url(#gold)">ASSOCIATE</text>
+ <rect x="3" y="30" width="875" height="5" rx="2.5" fill="url(#gold)"/>
+ <text x="5" y="92" font-family="Arial, sans-serif" font-size="31" font-weight="600" letter-spacing="11" fill="url(#silver)">FINANCE  |  LOANS  |  INSURANCE  |  CARS</text>
+</g>
+</svg>
