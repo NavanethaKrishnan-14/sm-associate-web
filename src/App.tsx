@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api } from "./services/api";
 
-type User={id:string;name:string;email:string;role:"ADMIN"|"STAFF"};
+type User={id:string;name:string;email:string;role:"ADMIN"|"STAFF";isActive?:boolean};
 type Customer={_id:string;customerId:string;name:string;mobile:string;email?:string;city?:string;occupation?:string};
 type Loan={_id:string;loanId:string;customerId:Customer;loanType:string;requiredAmount:number;approvedAmount?:number;financeCompany?:string;status:string;commission:number;applicationDate?:string;expectedDisbursementDate?:string;disbursementDate?:string;rejectionReason?:string;notes?:string};
 type Car={_id:string;vehicleId:string;registrationNumber:string;make:string;model:string;year:number;ownerNumber:number;km:number;fuel:string;purchasePrice:number;status:string;sellerId?:Customer};
@@ -31,13 +31,15 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  <div className="nav-title">LOAN MANAGEMENT</div>{["Loan Dashboard","Applications","Active Loans","Follow-ups"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
  <div className="nav-title">CAR MANAGEMENT</div>{["Car Buying","Car Inventory","Car Sold","Expenses"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
  <div className="nav-title">CUSTOMER MANAGEMENT</div>{["Customers","Customer History"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
- <div className="nav-title">PROFIT & REPORTS</div>{["Car Profit","Loan Revenue","Reports"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}</nav>
+ <div className="nav-title">PROFIT & REPORTS</div>{["Car Profit","Loan Revenue","Reports"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
+ {user.role==="ADMIN"&&<><div className="nav-title">ADMINISTRATION</div><Nav label="Users" page={page} setPage={setPage}/></>}</nav>
  <div className="sidebar-user"><strong>{user.name}</strong><span>{user.role}</span><button onClick={onLogout}>Sign out</button></div></aside>
  <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page}/></main></div>
 }
 function Nav({label,page,setPage}:{label:string;page:string;setPage:(x:string)=>void}){return <button className={page===label?"nav-link active":"nav-link"} onClick={()=>setPage(label)}>{label}</button>}
 
 function PageContent({page}:{page:string}){
+ if(page==="Users")return <UsersPage/>;
  if(page==="Customers"||page==="Customer History")return <CustomersPage historyOnly={page==="Customer History"}/>;
  if(page==="Loans"||page==="Loan Dashboard"||page==="Applications"||page==="Active Loans"||page==="Follow-ups"||page==="Loan Revenue")return <LoansPage filter={page}/>;
  if(page==="Cars"||page==="Car Inventory"||page==="Expenses")return <CarsPage mode={page}/>;
@@ -45,6 +47,16 @@ function PageContent({page}:{page:string}){
  if(page==="Car Buying")return <CarBuyingPage/>;
  if(page==="Car Sold")return <CarSoldPage/>;
  return <DashboardPage/>;
+}
+
+function UsersPage(){
+ const[users,setUsers]=useState<User[]>([]);const[form,setForm]=useState({name:"",email:"",password:"",role:"STAFF"});const[message,setMessage]=useState("");const[error,setError]=useState("");
+ const load=()=>api.get("/auth/users").then(r=>setUsers(r.data.data)).catch(e=>setError(e?.response?.data?.message||"Unable to load users."));
+ useEffect(()=>{load()},[]);
+ async function add(e:FormEvent){e.preventDefault();setMessage("");setError("");try{await api.post("/auth/users",form);setForm({name:"",email:"",password:"",role:"STAFF"});setMessage("User created successfully.");load()}catch(e:any){setError(e?.response?.data?.message||"Unable to create user.")}}
+ async function toggle(u:User){setMessage("");setError("");try{await api.patch("/auth/users/"+u.id,{isActive:!u.isActive});setMessage("User access updated.");load()}catch(e:any){setError(e?.response?.data?.message||"Unable to update user.")}}
+ async function changeRole(u:User,role:"ADMIN"|"STAFF"){setMessage("");setError("");try{await api.patch("/auth/users/"+u.id,{role});setMessage("Role updated.");load()}catch(e:any){setError(e?.response?.data?.message||"Unable to update role.")}}
+ return <div className="module-grid"><section className="panel"><div className="panel-head"><div><h2>User Management</h2><p>ADMIN-only access. Control staff accounts and roles.</p></div></div>{message&&<div className="success-box">{message}</div>}{error&&<div className="error-box">{error}</div>}<div className="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody>{users.map(u=><tr key={u.id}><td>{u.name}</td><td>{u.email}</td><td><select value={u.role} onChange={e=>changeRole(u,e.target.value as "ADMIN"|"STAFF")}><option value="STAFF">STAFF</option><option value="ADMIN">ADMIN</option></select></td><td><span className="status">{u.isActive?"ACTIVE":"INACTIVE"}</span></td><td><button className="small-btn" onClick={()=>toggle(u)}>{u.isActive?"Deactivate":"Activate"}</button></td></tr>)}</tbody></table></div></section><section className="panel form-panel"><h2>Create User</h2><form onSubmit={add}><input placeholder="Full name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required/><input type="email" placeholder="Email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} required/><input type="password" placeholder="Password (min 8 characters)" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} minLength={8} required/><select value={form.role} onChange={e=>setForm({...form,role:e.target.value})}><option value="STAFF">STAFF</option><option value="ADMIN">ADMIN</option></select><button className="primary-btn">Create User</button></form></section></div>
 }
 
 function DashboardPage(){
