@@ -39,7 +39,7 @@ const ICON_PATHS:Record<IconName,string[]>={
  arrow:["M5 12h14m-6-6 6 6-6 6"],
  bell:["M7 17h10l-1-2V10a4 4 0 0 0-8 0v5l-1 2Zm3 3h4"]
 };
-function AppIcon({name,className=""}:{name:IconName;className?:string}){return <svg className={"app-icon "+className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICON_PATHS[name].map((d,i)=><path key={i} d={d}/>)}</svg>}
+function AppIcon({name,className=""}:{name:IconName;className?:string}){const paths=ICON_PATHS[name]??ICON_PATHS.dashboard;return <svg className={"app-icon "+className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths.map((d,i)=><path key={i} d={d}/>)}</svg>}
 function iconForLabel(label:string):IconName{
  if(label==="Dashboard")return "dashboard";
  if(label==="Loan Dashboard")return "loans";
