@@ -42,8 +42,10 @@ function Login({onLogin}:{onLogin:(u:User)=>void}){
  return <div className="login-page"><div className="login-panel"><div className="login-brand">SM ASSOCIATE</div><h1>Management System</h1><p>Secure access for finance and car operations.</p><form onSubmit={submit}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{error&&<div className="error-box">{error}</div>}<button className="primary-btn" disabled={busy}>{busy?"Signing in...":"Sign in"}</button></form></div></div>
 }
 
+function navigateTo(page:string,context?:any){window.dispatchEvent(new CustomEvent("sm-navigate",{detail:{page,context}}))}
 function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
- const[page,setPage]=useState("Dashboard");
+ const[page,setPage]=useState("Dashboard");const[context,setContext]=useState<any>(null);
+ useEffect(()=>{const handler=(e:Event)=>{const d=(e as CustomEvent).detail||{};setContext(d.context??null);if(d.page)setPage(d.page)};window.addEventListener("sm-navigate",handler);return()=>window.removeEventListener("sm-navigate",handler)},[]);
  const groups=[
   {title:"GENERAL",items:["Dashboard"]},
   {title:"LOAN MANAGEMENT",items:["Loan Dashboard","Applications","Active Loans","Follow-ups"]},
@@ -57,14 +59,18 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  useEffect(()=>{setOpenGroup(activeGroup)},[activeGroup]);
  return <div className="app"><aside className="sidebar"><div className="brand">SM ASSOCIATE</div><nav>{groups.map((group,index)=><SidebarGroup key={group.title} title={group.title} items={group.items} open={openGroup===index} onToggle={()=>setOpenGroup(openGroup===index?-1:index)} page={page} setPage={setPage}/>)}</nav>
  <div className="sidebar-user"><strong>{user.name}</strong><span>{user.role}</span><button onClick={onLogout}>Sign out</button></div></aside>
- <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page} userRole={user.role}/></main></div>
+ <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page} userRole={user.role} context={context}/></main></div>
 }
 function SidebarGroup({title,items,open,onToggle,page,setPage}:{title:string;items:string[];open:boolean;onToggle:()=>void;page:string;setPage:(x:string)=>void}){
  return <section className={open?"sidebar-group open":"sidebar-group"}><button type="button" className="sidebar-group-trigger" onClick={onToggle} aria-expanded={open}><span>{title}</span><span className="sidebar-group-chevron" aria-hidden="true"></span></button>{open&&<div className="sidebar-group-menu">{items.map(item=><Nav key={item} label={item} page={page} setPage={setPage}/>)}</div>}</section>
 }
 function Nav({label,page,setPage}:{label:string;page:string;setPage:(x:string)=>void}){return <button className={page===label?"nav-link active":"nav-link"} onClick={()=>setPage(label)}>{label}</button>}
 
-function PageContent({page,userRole}:{page:string;userRole:"ADMIN"|"STAFF"}){
+function PageContent({page,userRole,context}:{page:string;userRole:"ADMIN"|"STAFF";context?:any}){
+ if(page==="Create User")return <CreateUserPage/>;
+ if(page==="Add Customer")return <AddCustomerPage/>;
+ if(page==="New Loan")return <NewLoanPage/>;
+ if(page==="Add Expense"||page==="Edit Expense")return <ExpenseFormPage expenseId={context?.expenseId} />;
  if(page==="Users")return <UsersPage/>;
  if(page==="Customers"||page==="Customer History")return <CustomersPage historyOnly={page==="Customer History"}/>;
  if(page==="Loans"||page==="Loan Dashboard"||page==="Applications"||page==="Active Loans"||page==="Follow-ups"||page==="Loan Revenue")return <LoansPage filter={page}/>;
