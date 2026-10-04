@@ -29,9 +29,9 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  return <div className="app"><aside className="sidebar"><div className="brand">SM ASSOCIATE</div><nav>
  <div className="nav-title">GENERAL</div><Nav label="Dashboard" page={page} setPage={setPage}/>
  <div className="nav-title">LOAN MANAGEMENT</div>{["Loan Dashboard","Applications","Active Loans","Follow-ups"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
- <div className="nav-title">CAR MANAGEMENT</div>{["Car Buying","Car Inventory","Car Sold","Expenses"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
+ <div className="nav-title">CAR MANAGEMENT</div>{(user.role==="ADMIN"?["Car Buying","Car Inventory","Car Sold","Expenses"]:["Car Buying","Car Inventory","Expenses"]).map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
  <div className="nav-title">CUSTOMER MANAGEMENT</div>{["Customers","Customer History"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
- <div className="nav-title">PROFIT & REPORTS</div>{["Car Profit","Loan Revenue","Reports"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
+ <div className="nav-title">PROFIT & REPORTS</div>{user.role==="ADMIN"?["Car Profit","Loan Revenue","Reports"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>):<Nav label="Reports" page={page} setPage={setPage}/>}}
  {user.role==="ADMIN"&&<><div className="nav-title">ADMINISTRATION</div><Nav label="Users" page={page} setPage={setPage}/></>}</nav>
  <div className="sidebar-user"><strong>{user.name}</strong><span>{user.role}</span><button onClick={onLogout}>Sign out</button></div></aside>
  <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page}/></main></div>
