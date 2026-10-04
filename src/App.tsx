@@ -22,7 +22,7 @@ function PremiumSelect({value,onChange,placeholder,options}:{value:string;onChan
  const[open,setOpen]=useState(false);const[search,setSearch]=useState("");
  const selected=options.find(x=>x.value===value);const filtered=options.filter(x=>x.label.toLowerCase().includes(search.toLowerCase()));
  return <div className="premium-select">
-  <button type="button" className={open?"premium-select-trigger open":"premium-select-trigger"} onClick={()=>{setOpen(!open);setSearch("")}}><span className={selected?"selected":"placeholder"}>{selected?.label||placeholder}</span><span className="premium-select-chevron">⌄</span></button>
+  <button type="button" className={open?"premium-select-trigger open":"premium-select-trigger"} onClick={()=>{setOpen(!open);setSearch("")}}><span className={selected?"selected":"placeholder"}>{selected?.label||placeholder}</span><span className="premium-select-chevron" aria-hidden="true"></span></button>
   {open&&<div className="premium-select-menu"><input autoFocus className="premium-select-search" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/><div className="premium-select-options">{!filtered.length?<div className="premium-select-empty">No matching results</div>:filtered.map(x=><button type="button" key={x.value} className={x.value===value?"premium-select-option active":"premium-select-option"} onClick={()=>{onChange(x.value);setOpen(false);setSearch("")}}><span>{x.label}</span>{x.value===value&&<span className="premium-select-check">✓</span>}</button>)}</div></div>}
  </div>
 }
