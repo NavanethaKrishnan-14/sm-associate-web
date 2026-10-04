@@ -147,7 +147,7 @@ function ExpensesPage(){
  const[cars,setCars]=useState<Car[]>([]);const[expenses,setExpenses]=useState<CarExpense[]>([]);
  const[editing,setEditing]=useState<CarExpense|null>(null);const[message,setMessage]=useState("");const[error,setError]=useState("");
  const[form,setForm]=useState({carId:"",category:"Service",amount:"",description:"",date:new Date().toISOString().slice(0,10)});
- const load=async()=>{try{const[a,b]=await Promise.all([api.get("/cars"),api.get("/cars/expenses")]);setCars(a.data.data);setExpenses(b.data.data);setError("")}catch(e:any){setError(e?.response?.data?.message||"Unable to load expenses.")}};
+ const load=async()=>{try{const[a,b]=await Promise.all([api.get("/cars",{params:{status:"AVAILABLE"}}),api.get("/cars/expenses")]);setCars(a.data.data);setExpenses(b.data.data);setError("")}catch(e:any){setError(e?.response?.data?.message||"Unable to load expenses.")}};
  useEffect(()=>{load()},[]);
  function reset(){setEditing(null);setForm({carId:"",category:"Service",amount:"",description:"",date:new Date().toISOString().slice(0,10)})}
  function edit(x:CarExpense){setEditing(x);setForm({carId:x.carId?._id||x.carId||"",category:x.category,amount:String(x.amount),description:x.description||"",date:x.date?new Date(x.date).toISOString().slice(0,10):new Date().toISOString().slice(0,10)})}
