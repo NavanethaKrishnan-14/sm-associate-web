@@ -8,7 +8,7 @@ type Car={_id:string;vehicleId:string;registrationNumber:string;make:string;mode
 type Dashboard={customers:number;activeLoans:number;carsInInventory:number;carsSold:number;totalSales:number;totalInvestment:number;totalProfit:number};
 
 const money=(v:number)=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(v);
-const nav=[["Dashboard","Dashboard"],["Loan Dashboard","Loans"],["Applications","Loans"],["Active Loans","Loans"],["Car Buying","Car Buying"],["Car Inventory","Cars"],["Car Sold","Sold"],["Expenses","Cars"],["Customers","Customers"],["Customer History","Customers"],["Car Profit","Profit"],["Loan Revenue","Loans"],["Reports","Dashboard"]];
+const nav=[["Dashboard","Dashboard"],["Loan Dashboard","Loans"],["Applications","Loans"],["Active Loans","Loans"],["Car Buying","Car Buying"],["Car Inventory","Cars"],["Car Sold","Sold"],["Expenses","Expenses"],["Customers","Customers"],["Customer History","Customers"],["Car Profit","Profit"],["Loan Revenue","Loans"],["Reports","Dashboard"]];
 
 export default function App(){
  const [user,setUser]=useState<User|null>(null); const [loading,setLoading]=useState(true);
@@ -29,7 +29,7 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  return <div className="app"><aside className="sidebar"><div className="brand">SM ASSOCIATE</div><nav>
  <div className="nav-title">GENERAL</div><Nav label="Dashboard" page={page} setPage={setPage}/>
  <div className="nav-title">LOAN MANAGEMENT</div>{["Loan Dashboard","Applications","Active Loans","Follow-ups"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
- <div className="nav-title">CAR MANAGEMENT</div>{(user.role==="ADMIN"?["Car Buying","Car Inventory","Car Sold","Expenses"]:["Car Buying","Car Inventory","Expenses"]).map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
+ <div className="nav-title">CAR MANAGEMENT</div>{(user.role==="ADMIN"?["Car Buying","Car Inventory","Car Sold","Expenses"]:["Car Buying","Car Inventory"]).map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
  <div className="nav-title">CUSTOMER MANAGEMENT</div>{["Customers","Customer History"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>)}
  <div className="nav-title">PROFIT & REPORTS</div>{user.role==="ADMIN"?["Car Profit","Loan Revenue","Reports"].map(x=><Nav key={x} label={x} page={page} setPage={setPage}/>):<Nav label="Reports" page={page} setPage={setPage}/>}
  {user.role==="ADMIN"&&<><div className="nav-title">ADMINISTRATION</div><Nav label="Users" page={page} setPage={setPage}/></>}</nav>
@@ -42,7 +42,8 @@ function PageContent({page}:{page:string}){
  if(page==="Users")return <UsersPage/>;
  if(page==="Customers"||page==="Customer History")return <CustomersPage historyOnly={page==="Customer History"}/>;
  if(page==="Loans"||page==="Loan Dashboard"||page==="Applications"||page==="Active Loans"||page==="Follow-ups"||page==="Loan Revenue")return <LoansPage filter={page}/>;
- if(page==="Cars"||page==="Car Inventory"||page==="Expenses")return <CarsPage mode={page}/>;
+ if(page==="Cars"||page==="Car Inventory")return <CarsPage mode={page}/>;
+ if(page==="Expenses")return <ExpensesPage/>;
  if(page==="Car Profit")return <ProfitPage/>;
  if(page==="Car Buying")return <CarBuyingPage/>;
  if(page==="Car Sold")return <CarSoldPage/>;
@@ -111,8 +112,25 @@ function CarsPage({mode}:{mode:string}){
  const[cars,setCars]=useState<Car[]>([]);const[message,setMessage]=useState("");
  const load=()=>api.get("/cars",{params:{status:mode==="Car Inventory"?"AVAILABLE":undefined}}).then(r=>setCars(r.data.data)).catch(()=>setMessage("Unable to load cars."));
  useEffect(()=>{load()},[mode]);
- async function addExpense(id:string){const amount=window.prompt("Expense amount");if(!amount)return;try{await api.post(`/cars/${id}/expenses`,{category:"General",amount:Number(amount),description:"Added from web"});setMessage("Expense added.");}catch(e:any){setMessage(e?.response?.data?.message||"Unable to add expense.")}}
- return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicles, investment and operating expenses.</p></div></div>{message&&<div className="success-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase</th><th>Status</th>{mode==="Expenses"&&<th>Action</th>}</tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td><span className="status">{c.status}</span></td>{mode==="Expenses"&&<td><button className="small-btn" onClick={()=>addExpense(c._id)}>Add Expense</button></td>}</tr>)}{!cars.length&&<tr><td colSpan={6} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
+ return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicles, investment and operating details.</p></div></div>{message&&<div className="error-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase</th><th>Status</th></tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td><span className="status">{c.status}</span></td></tr>)}{!cars.length&&<tr><td colSpan={5} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
+}
+
+type CarExpense={_id:string;carId:any;category:string;amount:number;description?:string;date:string;createdAt?:string};
+
+function ExpensesPage(){
+ const[cars,setCars]=useState<Car[]>([]);const[expenses,setExpenses]=useState<CarExpense[]>([]);
+ const[editing,setEditing]=useState<CarExpense|null>(null);const[message,setMessage]=useState("");const[error,setError]=useState("");
+ const[form,setForm]=useState({carId:"",category:"Service",amount:"",description:"",date:new Date().toISOString().slice(0,10)});
+ const load=async()=>{try{const[a,b]=await Promise.all([api.get("/cars"),api.get("/cars/expenses")]);setCars(a.data.data);setExpenses(b.data.data);setError("")}catch(e:any){setError(e?.response?.data?.message||"Unable to load expenses.")}};
+ useEffect(()=>{load()},[]);
+ function reset(){setEditing(null);setForm({carId:"",category:"Service",amount:"",description:"",date:new Date().toISOString().slice(0,10)})}
+ function edit(x:CarExpense){setEditing(x);setForm({carId:x.carId?._id||x.carId||"",category:x.category,amount:String(x.amount),description:x.description||"",date:x.date?new Date(x.date).toISOString().slice(0,10):new Date().toISOString().slice(0,10)})}
+ async function save(e:FormEvent){e.preventDefault();setMessage("");setError("");try{
+  if(editing){await api.patch(`/cars/${editing.carId?._id||editing.carId}/expenses/${editing._id}`,{category:form.category,amount:Number(form.amount),description:form.description,date:form.date});setMessage("Expense updated successfully.")}
+  else {if(!form.carId)throw new Error("Select a vehicle.");await api.post(`/cars/${form.carId}/expenses`,{category:form.category,amount:Number(form.amount),description:form.description,date:form.date});setMessage("Expense added successfully.")}
+  reset();await load();
+ }catch(e:any){setError(e?.response?.data?.message||e?.message||"Unable to save expense.")}}
+ return <div className="module-grid"><section className="panel"><div className="panel-head"><div><h2>Vehicle Expenses</h2><p>Add, review and edit every expense linked to an inventory vehicle.</p></div></div>{message&&<div className="success-box">{message}</div>}{error&&<div className="error-box">{error}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Category</th><th>Description</th><th>Date</th><th>Amount</th><th>Action</th></tr></thead><tbody>{expenses.map(x=><tr key={x._id}><td>{x.carId?.vehicleId||"—"}<br/><small>{x.carId?.registrationNumber||""}</small></td><td>{x.category}</td><td>{x.description||"—"}</td><td>{x.date?new Date(x.date).toLocaleDateString("en-IN"):"—"}</td><td>{money(x.amount)}</td><td><button className="small-btn" onClick={()=>edit(x)}>Edit</button></td></tr>)}{!expenses.length&&<tr><td colSpan={6} className="empty">No expenses recorded yet.</td></tr>}</tbody></table></div></section><section className="panel form-panel"><div className="panel-head"><div><h2>{editing?"Edit Expense":"Add Expense"}</h2><p>{editing?"Update the selected vehicle expense.":"Record a new expense against a vehicle."}</p></div></div><form onSubmit={save}>{!editing&&<select value={form.carId} onChange={e=>setForm({...form,carId:e.target.value})} required><option value="">Select vehicle</option>{cars.map(c=><option key={c._id} value={c._id}>{c.vehicleId} — {c.registrationNumber} — {c.make} {c.model}</option>)}</select>}<select value={form.category} onChange={e=>setForm({...form,category:e.target.value})}><option>Service</option><option>Repair</option><option>Tyres</option><option>Insurance</option><option>Cleaning</option><option>Accessories</option><option>RC / Documents</option><option>Other</option></select><input type="number" min="0" step="0.01" placeholder="Expense amount" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} required/><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/><textarea placeholder="Description" value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/><div style={{display:"flex",gap:8}}><button className="primary-btn">{editing?"Update Expense":"Add Expense"}</button>{editing&&<button type="button" className="small-btn" onClick={reset}>Cancel</button>}</div></form></section></div>
 }
 
 function ProfitPage(){
