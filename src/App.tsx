@@ -103,7 +103,7 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
   {title:"PROFIT & REPORTS",items:user.role==="ADMIN"?["Car Profit","Loan Revenue","Reports"]:["Reports"]},
   ...(user.role==="ADMIN"?[{title:"ADMINISTRATION",items:["Users"]}]:[])
  ];
- const activeGroup=groups.findIndex(g=>g.items.includes(page));
+ const activeGroup=groups.findIndex(g=>g.items.includes(page) || (["Create User","User Details"].includes(page)&&g.title==="ADMINISTRATION") || (["Add Customer","Customer Details"].includes(page)&&g.title==="CUSTOMER MANAGEMENT") || (["New Loan","Loan Details","Edit Loan"].includes(page)&&g.title==="LOAN MANAGEMENT") || (["Add Expense","Edit Expense","Expense Details"].includes(page)&&g.title==="CAR MANAGEMENT") || (["Car Buying","Vehicle Details"].includes(page)&&g.title==="CAR MANAGEMENT") || (["Car Sold"].includes(page)&&g.title==="CAR MANAGEMENT"));
  const[openGroup,setOpenGroup]=useState(activeGroup);
  useEffect(()=>{setOpenGroup(activeGroup)},[activeGroup]);
  return <div className="app"><aside className="sidebar"><div className="brand"><PremiumLogo compact /></div><nav>{groups.map((group,index)=><SidebarGroup key={group.title} title={group.title} items={group.items} open={openGroup===index} onToggle={()=>setOpenGroup(openGroup===index?-1:index)} page={page} setPage={setPage}/>)}</nav>
