@@ -40,7 +40,8 @@ function Nav({label,page,setPage}:{label:string;page:string;setPage:(x:string)=>
 function PageContent({page}:{page:string}){
  if(page==="Customers"||page==="Customer History")return <CustomersPage historyOnly={page==="Customer History"}/>;
  if(page==="Loans"||page==="Loan Dashboard"||page==="Applications"||page==="Active Loans"||page==="Follow-ups"||page==="Loan Revenue")return <LoansPage filter={page}/>;
- if(page==="Cars"||page==="Car Inventory"||page==="Expenses"||page==="Car Profit")return <CarsPage mode={page}/>;
+ if(page==="Cars"||page==="Car Inventory"||page==="Expenses")return <CarsPage mode={page}/>;
+ if(page==="Car Profit")return <ProfitPage/>;
  if(page==="Car Buying")return <CarBuyingPage/>;
  if(page==="Car Sold")return <CarSoldPage/>;
  return <DashboardPage/>;
@@ -82,6 +83,12 @@ function CarsPage({mode}:{mode:string}){
  useEffect(()=>{load()},[mode]);
  async function addExpense(id:string){const amount=window.prompt("Expense amount");if(!amount)return;try{await api.post(`/cars/${id}/expenses`,{category:"General",amount:Number(amount),description:"Added from web"});setMessage("Expense added.");}catch(e:any){setMessage(e?.response?.data?.message||"Unable to add expense.")}}
  return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicles, investment and operating expenses.</p></div></div>{message&&<div className="success-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase</th><th>Status</th>{mode==="Expenses"&&<th>Action</th>}</tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td><span className="status">{c.status}</span></td>{mode==="Expenses"&&<td><button className="small-btn" onClick={()=>addExpense(c._id)}>Add Expense</button></td>}</tr>)}{!cars.length&&<tr><td colSpan={6} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
+}
+
+function ProfitPage(){
+ const[data,setData]=useState<any>(null);useEffect(()=>{api.get("/cars/profits").then(r=>setData(r.data.data))},[]);
+ const s=data?.summary;
+ return <section className="panel"><div className="panel-head"><div><h2>Car Profit Report</h2><p>Separate profit for every sold vehicle.</p></div></div><div className="cards compact"><Card label="Total Sales" value={money(s?.sales??0)}/><Card label="Total Investment" value={money(s?.investment??0)}/><Card label="Selling Expenses" value={money(s?.sellingExpenses??0)}/><Card label="Net Profit" value={money(s?.profit??0)}/></div><div className="table-wrap"><table><thead><tr><th>Sale</th><th>Vehicle</th><th>Buyer</th><th>Investment</th><th>Sale Value</th><th>Profit</th></tr></thead><tbody>{(data?.sales??[]).map((x:any)=><tr key={x._id}><td>{x.saleId}</td><td>{x.carId?.vehicleId} — {x.carId?.make} {x.carId?.model}</td><td>{x.buyerId?.name||"—"}</td><td>{money(x.totalInvestment)}</td><td>{money(x.sellingPrice)}</td><td className={x.profit>=0?"profit-positive":"profit-negative"}>{money(x.profit)}</td></tr>)}{!(data?.sales?.length)&&<tr><td colSpan={6} className="empty">No sold cars yet.</td></tr>}</tbody></table></div></section>
 }
 
 function CarSoldPage(){
