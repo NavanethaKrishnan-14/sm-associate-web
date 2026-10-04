@@ -36,10 +36,14 @@ function PremiumSelect({value,onChange,placeholder,options}:{value:string;onChan
  </div>
 }
 
+function PremiumLogo({compact=false}:{compact?:boolean}){return <div className={compact?"premium-logo compact":"premium-logo"} aria-label="SM Associate"><span className="premium-logo-mark" aria-hidden="true"><span>S</span><span>M</span></span><span className="premium-logo-type"><strong>SM</strong><em>ASSOCIATE</em></span></div>}
+
+function TopBar({user}:{user:User}){const[q,setQ]=useState("");function submit(e:FormEvent){e.preventDefault();const term=q.trim();if(term)window.dispatchEvent(new CustomEvent("sm-global-search",{detail:{query:term}}))}return <div className="topbar"><div className="topbar-search"><form onSubmit={submit}><span className="search-icon" aria-hidden="true"></span><input aria-label="Search" value={q} onChange={e=>setQ(e.target.value)} placeholder="Search customers, loans, vehicles..." /></form></div><div className="topbar-actions"><button type="button" className="topbar-icon" aria-label="Notifications"><span className="bell-icon"></span></button><div className="topbar-profile"><span className="profile-avatar">{user.name.trim().slice(0,1).toUpperCase()||"S"}</span><span className="profile-copy"><strong>{user.name}</strong><small>{user.role}</small></span><span className="profile-chevron"></span></div></div></div>}
+
 function Login({onLogin}:{onLogin:(u:User)=>void}){
  const[email,setEmail]=useState("");const[password,setPassword]=useState("");const[error,setError]=useState("");const[busy,setBusy]=useState(false);
  async function submit(e:FormEvent){e.preventDefault();setError("");setBusy(true);try{const r=await api.post("/auth/login",{email,password});localStorage.setItem("sm_token",r.data.data.token);onLogin(r.data.data.user)}catch(e:any){setError(e?.response?.data?.message||"Unable to sign in. Please try again.")}finally{setBusy(false)}}
- return <div className="login-page"><div className="login-panel"><div className="login-brand">SM ASSOCIATE</div><h1>Management System</h1><p>Secure access for finance and car operations.</p><form onSubmit={submit}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{error&&<div className="error-box">{error}</div>}<button className="primary-btn" disabled={busy}>{busy?"Signing in...":"Sign in"}</button></form></div></div>
+ return <div className="login-page"><div className="login-panel"><PremiumLogo /><h1>Management System</h1><p>Secure access for finance and car operations.</p><form onSubmit={submit}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required/></label>{error&&<div className="error-box">{error}</div>}<button className="primary-btn" disabled={busy}>{busy?"Signing in...":"Sign in"}</button></form></div></div>
 }
 
 function navigateTo(page:string,context?:any){window.dispatchEvent(new CustomEvent("sm-navigate",{detail:{page,context}}))}
@@ -57,9 +61,9 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  const activeGroup=groups.findIndex(g=>g.items.includes(page));
  const[openGroup,setOpenGroup]=useState(activeGroup);
  useEffect(()=>{setOpenGroup(activeGroup)},[activeGroup]);
- return <div className="app"><aside className="sidebar"><div className="brand">SM ASSOCIATE</div><nav>{groups.map((group,index)=><SidebarGroup key={group.title} title={group.title} items={group.items} open={openGroup===index} onToggle={()=>setOpenGroup(openGroup===index?-1:index)} page={page} setPage={setPage}/>)}</nav>
+ return <div className="app"><aside className="sidebar"><div className="brand"><PremiumLogo compact /></div><nav>{groups.map((group,index)=><SidebarGroup key={group.title} title={group.title} items={group.items} open={openGroup===index} onToggle={()=>setOpenGroup(openGroup===index?-1:index)} page={page} setPage={setPage}/>)}</nav>
  <div className="sidebar-user"><strong>{user.name}</strong><span>{user.role}</span><button onClick={onLogout}>Sign out</button></div></aside>
- <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page} userRole={user.role} context={context}/></main></div>
+ <main className="main"><TopBar user={user}/><header><div><span className="eyebrow">SM ASSOCIATE / MANAGEMENT</span><h1>{page}</h1><p>Manage finance, customers and automotive operations.</p></div></header><PageContent page={page} userRole={user.role} context={context}/></main></div>
 }
 function SidebarGroup({title,items,open,onToggle,page,setPage}:{title:string;items:string[];open:boolean;onToggle:()=>void;page:string;setPage:(x:string)=>void}){
  return <section className={open?"sidebar-group open":"sidebar-group"}><button type="button" className="sidebar-group-trigger" onClick={onToggle} aria-expanded={open}><span>{title}</span><span className="sidebar-group-chevron" aria-hidden="true"></span></button>{open&&<div className="sidebar-group-menu">{items.map(item=><Nav key={item} label={item} page={page} setPage={setPage}/>)}</div>}</section>
