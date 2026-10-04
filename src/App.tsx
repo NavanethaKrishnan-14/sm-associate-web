@@ -21,8 +21,17 @@ export default function App(){
 function PremiumSelect({value,onChange,placeholder,options}:{value:string;onChange:(value:string)=>void;placeholder:string;options:{value:string;label:string}[]}){
  const[open,setOpen]=useState(false);const[search,setSearch]=useState("");
  const selected=options.find(x=>x.value===value);const filtered=options.filter(x=>x.label.toLowerCase().includes(search.toLowerCase()));
+ useEffect(()=>{
+  if(!open)return;
+  const closeOther=()=>{setOpen(false);setSearch("")};
+  window.addEventListener("premium-select-open",closeOther);
+  const handleOutside=(e:MouseEvent)=>{const target=e.target as Node;if(!(target as Element)?.closest?.(".premium-select")){setOpen(false);setSearch("")}};
+  document.addEventListener("mousedown",handleOutside);
+  return()=>{window.removeEventListener("premium-select-open",closeOther);document.removeEventListener("mousedown",handleOutside)};
+ },[open]);
+ function toggle(){if(!open){window.dispatchEvent(new Event("premium-select-open"));setOpen(true)}else setOpen(false);setSearch("")}
  return <div className="premium-select">
-  <button type="button" className={open?"premium-select-trigger open":"premium-select-trigger"} onClick={()=>{setOpen(!open);setSearch("")}}><span className={selected?"selected":"placeholder"}>{selected?.label||placeholder}</span><span className="premium-select-chevron" aria-hidden="true"></span></button>
+  <button type="button" className={open?"premium-select-trigger open":"premium-select-trigger"} onClick={toggle} aria-expanded={open}><span className={selected?"selected":"placeholder"}>{selected?.label||placeholder}</span><span className="premium-select-chevron" aria-hidden="true"></span></button>
   {open&&<div className="premium-select-menu"><input autoFocus className="premium-select-search" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/><div className="premium-select-options">{!filtered.length?<div className="premium-select-empty">No matching results</div>:filtered.map(x=><button type="button" key={x.value} className={x.value===value?"premium-select-option active":"premium-select-option"} onClick={()=>{onChange(x.value);setOpen(false);setSearch("")}}><span>{x.label}</span>{x.value===value&&<span className="premium-select-check">✓</span>}</button>)}</div></div>}
  </div>
 }
