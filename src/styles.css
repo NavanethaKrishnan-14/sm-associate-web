@@ -203,3 +203,14 @@ tbody tr:hover{background:#faf5ea}
 .action-buttons{gap:7px}
 .delete-btn{border-color:#e4b8b4;background:#fff7f6;color:#b42318}
 @media(max-width:650px){header{padding:22px;border-radius:16px}.card{min-height:118px}.panel{padding:19px;border-radius:16px}.nav-link{padding-left:14px}}
+
+/* Sidebar spacing refinement */
+.brand{padding-top:0;padding-bottom:18px;transform:translateY(-4px)}
+.brand-logo-image.compact{transform:translateY(-2px)}
+.sidebar-user{padding:10px 7px 0;gap:2px}
+.sidebar-user strong{font-size:11px;line-height:1.25}
+.sidebar-user span{font-size:9px;letter-spacing:.07em}
+.sidebar-user button{margin-top:7px;padding:6px;font-size:11px;border-radius:7px}
+nav{scrollbar-width:none;-ms-overflow-style:none}
+nav::-webkit-scrollbar{display:none;width:0;height:0}
+.sidebar{overflow:hidden}
