@@ -65,7 +65,7 @@ function CustomersPage({historyOnly}:{historyOnly:boolean}){
 function LoansPage({filter}:{filter:string}){
  const[loans,setLoans]=useState<Loan[]>([]);const[customers,setCustomers]=useState<Customer[]>([]);const[selected,setSelected]=useState<Loan|null>(null);const[detail,setDetail]=useState<any>(null);
  const[form,setForm]=useState({customerId:"",loanType:"Home Loan",requiredAmount:"",financeCompany:"",commission:"",notes:""});const[follow,setFollow]=useState({followUpDate:"",nextFollowUpDate:"",note:""});const[message,setMessage]=useState("");const[error,setError]=useState("");
- const load=()=>{const params:any={};if(filter==="Active Loans")params.status="APPROVED";return api.get("/loans",{params}).then(r=>setLoans(r.data.data)).catch(()=>setError("Unable to load loans."))};
+ const load=()=>api.get("/loans").then(r=>setLoans(r.data.data)).catch(()=>setError("Unable to load loans."));
  useEffect(()=>{setError("");setMessage("");if(filter!=="Loan Revenue"&&filter!=="Follow-ups")load();api.get("/customers").then(r=>setCustomers(r.data.data)).catch(()=>{})},[filter]);
  async function add(e:FormEvent){e.preventDefault();setMessage("");setError("");try{await api.post("/loans",{...form,requiredAmount:Number(form.requiredAmount),commission:Number(form.commission||0)});setMessage("Loan application created successfully.");setForm({customerId:"",loanType:"Home Loan",requiredAmount:"",financeCompany:"",commission:"",notes:""});load()}catch(e:any){setError(e?.response?.data?.message||"Unable to create loan.")}}
  async function openLoan(l:Loan){setSelected(l);setError("");try{const r=await api.get("/loans/"+l._id);setDetail(r.data.data)}catch(e:any){setError(e?.response?.data?.message||"Unable to load loan details.")}}
