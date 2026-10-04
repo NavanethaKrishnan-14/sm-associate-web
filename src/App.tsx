@@ -57,18 +57,18 @@ function ManagementApp({user,onLogout}:{user:User;onLogout:()=>void}){
  useEffect(()=>{setOpenGroup(activeGroup)},[activeGroup]);
  return <div className="app"><aside className="sidebar"><div className="brand">SM ASSOCIATE</div><nav>{groups.map((group,index)=><SidebarGroup key={group.title} title={group.title} items={group.items} open={openGroup===index} onToggle={()=>setOpenGroup(openGroup===index?-1:index)} page={page} setPage={setPage}/>)}</nav>
  <div className="sidebar-user"><strong>{user.name}</strong><span>{user.role}</span><button onClick={onLogout}>Sign out</button></div></aside>
- <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page}/></main></div>
+ <main className="main"><header><div><h1>{page}</h1><p>SM Associate Management System</p></div><div className="user-pill">{user.name}</div></header><PageContent page={page} userRole={user.role}/></main></div>
 }
 function SidebarGroup({title,items,open,onToggle,page,setPage}:{title:string;items:string[];open:boolean;onToggle:()=>void;page:string;setPage:(x:string)=>void}){
  return <section className={open?"sidebar-group open":"sidebar-group"}><button type="button" className="sidebar-group-trigger" onClick={onToggle} aria-expanded={open}><span>{title}</span><span className="sidebar-group-chevron" aria-hidden="true"></span></button>{open&&<div className="sidebar-group-menu">{items.map(item=><Nav key={item} label={item} page={page} setPage={setPage}/>)}</div>}</section>
 }
 function Nav({label,page,setPage}:{label:string;page:string;setPage:(x:string)=>void}){return <button className={page===label?"nav-link active":"nav-link"} onClick={()=>setPage(label)}>{label}</button>}
 
-function PageContent({page}:{page:string}){
+function PageContent({page,userRole}:{page:string;userRole:"ADMIN"|"STAFF"}){
  if(page==="Users")return <UsersPage/>;
  if(page==="Customers"||page==="Customer History")return <CustomersPage historyOnly={page==="Customer History"}/>;
  if(page==="Loans"||page==="Loan Dashboard"||page==="Applications"||page==="Active Loans"||page==="Follow-ups"||page==="Loan Revenue")return <LoansPage filter={page}/>;
- if(page==="Cars"||page==="Car Inventory")return <CarsPage mode={page}/>;
+ if(page==="Cars"||page==="Car Inventory")return <CarsPage mode={page} userRole={userRole}/>;
  if(page==="Expenses")return <ExpensesPage/>;
  if(page==="Car Profit")return <ProfitPage/>;
  if(page==="Car Buying")return <CarBuyingPage/>;
@@ -134,13 +134,13 @@ function CarBuyingPage(){
  return <section className="panel narrow"><h2>Car Buying</h2><p>Record a vehicle purchase. Expenses and final profit are linked automatically.</p><form className="form-grid" onSubmit={add}><PremiumSelect value={form.sellerId} onChange={value=>setForm({...form,sellerId:value})} placeholder="Select seller" options={customers.map(c=>({value:c._id,label:`undefined — undefined`}))}/><input placeholder="Registration number" value={form.registrationNumber} onChange={e=>setForm({...form,registrationNumber:e.target.value})} required/><input placeholder="Make" value={form.make} onChange={e=>setForm({...form,make:e.target.value})} required/><input placeholder="Model" value={form.model} onChange={e=>setForm({...form,model:e.target.value})} required/><input type="number" placeholder="Year" value={form.year} onChange={e=>setForm({...form,year:e.target.value})} required/><input type="number" placeholder="Owner number" value={form.ownerNumber} onChange={e=>setForm({...form,ownerNumber:e.target.value})}/><input type="number" placeholder="KM" value={form.km} onChange={e=>setForm({...form,km:e.target.value})} required/><PremiumSelect value={form.fuel} onChange={value=>setForm({...form,fuel:value})} placeholder="Select fuel type" options={["Petrol","Diesel","CNG","Electric","Hybrid"].map(x=>({value:x,label:x}))}/><input type="number" placeholder="Purchase price" value={form.purchasePrice} onChange={e=>setForm({...form,purchasePrice:e.target.value})} required/>{message&&<div className="success-box full">{message}</div>}<button className="primary-btn full">Record Purchase</button></form></section>
 }
 
-function CarsPage({mode}:{mode:string}){
- const[cars,setCars]=useState<Car[]>([]);const[message,setMessage]=useState("");
- const load=()=>api.get("/cars",{params:{status:mode==="Car Inventory"?"AVAILABLE":undefined}}).then(r=>setCars(r.data.data)).catch(()=>setMessage("Unable to load cars."));
+function CarsPage({mode,userRole}:{mode:string;userRole:"ADMIN"|"STAFF"}){
+ const[cars,setCars]=useState<Car[]>([]);const[message,setMessage]=useState("");const[error,setError]=useState("");
+ const load=()=>api.get("/cars",{params:{status:mode==="Car Inventory"?"AVAILABLE":undefined}}).then(r=>setCars(r.data.data)).catch(()=>setError("Unable to load cars."));
  useEffect(()=>{load()},[mode]);
- return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicle purchase price plus every expense is treated as the current investment for profit calculation.</p></div></div>{message&&<div className="error-box">{message}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase Price</th><th>Expenses</th><th>Total Investment</th><th>Status</th></tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td>{money(c.expenseTotal||0)}</td><td><strong>{money(c.totalInvestment??c.purchasePrice)}</strong></td><td><span className="status">{c.status}</span></td></tr>)}{!cars.length&&<tr><td colSpan={7} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
+ async function changeStatus(car:Car,status:string){setMessage("");setError("");try{const r=await api.patch("/cars/"+car._id+"/status",{status});setCars(prev=>prev.map(x=>x._id===car._id?{...x,...r.data.data}:x));setMessage(car.vehicleId+" status updated to "+status+".")}catch(e:any){setError(e?.response?.data?.message||"Unable to update vehicle status.")}}
+ return <section className="panel"><div className="panel-head"><div><h2>{mode}</h2><p>Vehicle purchase price plus every expense is treated as the current investment for profit calculation.</p></div></div>{message&&<div className="success-box">{message}</div>}{error&&<div className="error-box">{error}</div>}<div className="table-wrap"><table><thead><tr><th>Vehicle</th><th>Registration</th><th>Model</th><th>Purchase Price</th><th>Expenses</th><th>Total Investment</th><th>Status</th></tr></thead><tbody>{cars.map(c=><tr key={c._id}><td>{c.vehicleId}</td><td>{c.registrationNumber}</td><td>{c.make} {c.model} ({c.year})</td><td>{money(c.purchasePrice)}</td><td>{money(c.expenseTotal||0)}</td><td><strong>{money(c.totalInvestment??c.purchasePrice)}</strong></td><td>{userRole==="ADMIN"?<PremiumSelect value={c.status} onChange={status=>changeStatus(c,status)} placeholder="Select status" options={[{value:"AVAILABLE",label:"AVAILABLE"},{value:"RESERVED",label:"RESERVED"},{value:"SOLD",label:"SOLD"}]}/>:<span className="status">{c.status}</span>}</td></tr>)}{!cars.length&&<tr><td colSpan={7} className="empty">No vehicles found.</td></tr>}</tbody></table></div></section>
 }
-
 type CarExpense={_id:string;carId:any;category:string;amount:number;description?:string;date:string;createdAt?:string};
 
 function ExpensesPage(){
