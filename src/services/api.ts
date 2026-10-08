@@ -10,7 +10,7 @@ api.interceptors.request.use(config=>{
 
 api.interceptors.response.use(response=>{
  const url=String(response.config?.url||"");
- const isListEndpoint=/\/(cars\/expenses|customers|loans|cars|auth\/users)\/?(?:\?|$)/.test(url);
+ const isListEndpoint=/\/(cars\/expenses|customers|loans|cars|auth\/users|finance-services|finance-enquiries|documents)\/?(?:\?|$)/.test(url);
  if(isListEndpoint && response.data && response.data.data == null) response.data.data=[];
  return response;
 },error=>{
