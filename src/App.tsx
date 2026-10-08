@@ -88,6 +88,7 @@ function PremiumSelect({value,onChange,placeholder,options}:{value:string;onChan
 function PremiumLogo({compact=false}:{compact?:boolean}){return <img className={compact?"brand-logo-image compact":"brand-logo-image"} src="/assets/sm-associate-logo.png" alt="SM Associate" />}
 
 function FormField({label,children,full=false}:{label:string;children:React.ReactNode;full?:boolean}){return <label className={full?"form-field full":"form-field"}><span>{label}</span>{children}</label>}
+function OwnerStepper({value,onChange}:{value:string;onChange:(value:string)=>void}){return <NumberStepper value={value} onChange={onChange} min={1} step={1} placeholder="Number of owners"/>}
 function NumberStepper({value,onChange,min=0,step=1,placeholder}:{value:string;onChange:(value:string)=>void;min?:number;step?:number;placeholder?:string}){
  const decimals=Math.max(0,String(step).split(".")[1]?.length||0);
  const change=(direction:number)=>{const current=Number(value);const base=Number.isFinite(current)?current:min;const next=Math.max(min,base+(direction*step));onChange(decimals?next.toFixed(decimals):String(Math.round(next)))};
