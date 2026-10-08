@@ -1,0 +1,33 @@
+/* Empty list state
+   Prevent blank service screens when a successful list response contains zero records.
+*/
+.table-wrap:has(> table > tbody:empty){
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:220px;
+  padding:40px 24px;
+  text-align:center;
+}
+
+.table-wrap:has(> table > tbody:empty) > table{
+  display:none;
+}
+
+.table-wrap:has(> table > tbody:empty)::before{
+  content:"No data";
+  display:block;
+  font-size:18px;
+  font-weight:700;
+  line-height:1.4;
+  margin-bottom:6px;
+}
+
+.table-wrap:has(> table > tbody:empty)::after{
+  content:"There are no records available to display.";
+  display:block;
+  font-size:14px;
+  line-height:1.5;
+  opacity:.68;
+}
