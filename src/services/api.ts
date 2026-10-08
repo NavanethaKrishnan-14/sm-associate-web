@@ -8,7 +8,13 @@ api.interceptors.request.use(config=>{
  return config;
 });
 
-api.interceptors.response.use(response=>response,error=>{
+api.interceptors.response.use(response=>{
+ const url=String(response.config?.url||"");
+ const isListEndpoint=/\/(customers|loans|cars|cars\/expenses|auth\/users)(?:[/?]|$)/.test(url)
+   && !/\/(financials|profits|documents|follow-ups)(?:[/?]|$)/.test(url);
+ if(isListEndpoint && response.data && response.data.data == null) response.data.data=[];
+ return response;
+},error=>{
  if(error.response?.status===401&&location.pathname!=="/") localStorage.removeItem("sm_token");
  return Promise.reject(error);
 });
